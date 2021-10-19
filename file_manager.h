@@ -7,14 +7,16 @@
 
 #include <string>
 #include <vector>
+#include <fstream>
+#include <sstream>
 
 class file_manager {
-    const std::string file_name;
-
+    int n;
     std::vector<int> tD;
     std::vector<int> t0_i;
     std::vector<std::vector<int>> t;
 
+    std::ifstream file;
     void read_from_file();
 public:
     file_manager(const std::string& fn);
