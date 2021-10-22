@@ -29,18 +29,18 @@ int order_permutation::get_gen_size() const{
 }
 
 int order_permutation::get_lower_bound(){
-    return lower_bound.count_lb(this);
+    return lower_bound->count_lb(this->gen);
 }
 
 int order_permutation::get_upper_bound() {
-    return upper_bound.count_ub(this);
+    return upper_bound->count_ub(this->gen);
 }
 
 const order_task &order_permutation::get_task() const {
     return task;
 }
 
-void order_permutation::link_bounds(abstract_lower_bound lb, abstract_upper_bound ub) {
+void order_permutation::link_bounds(abstract_lower_bound* lb, abstract_upper_bound* ub) {
     lower_bound = lb;
     upper_bound = ub;
 }

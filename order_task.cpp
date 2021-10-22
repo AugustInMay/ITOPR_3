@@ -12,7 +12,7 @@ void order_task::read_from_file(const file_manager& fm) {
     t = fm.get_t();
 }
 
-int order_task::get_cost_from(const std::vector<int> x) const{
+int order_task::get_cost_from(const std::vector<int>& x) const{
     int gen_time = 0;
     int overlap = 0;
 
@@ -29,9 +29,26 @@ int order_task::get_cost_from(const std::vector<int> x) const{
             overlap++;
         }
     }
+
     return overlap;
+}
+
+int order_task::get_time_from(const std::vector<int> &x) const {
+    int gen_time = 0;
+
+    gen_time += t0_i[x[0]];
+
+    for(int i=0; i<x.size()-1; i++){
+        gen_time += t[x[i]][x[i+1]];
+    }
+
+    return gen_time;
 }
 
 int order_task::get_n() const{
     return n;
+}
+
+int order_task::get_dest_time(const int &indx) const{
+    return tD[indx];
 }

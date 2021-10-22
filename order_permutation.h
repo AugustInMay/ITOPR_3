@@ -11,8 +11,8 @@
 class order_permutation {
     const order_task& task;
     std::vector<int> gen;
-    abstract_lower_bound lower_bound;
-    abstract_upper_bound upper_bound;
+    abstract_lower_bound* lower_bound;
+    abstract_upper_bound* upper_bound;
 
     int cost;
 public:
@@ -27,7 +27,7 @@ public:
     int get_gen_size() const;
     const order_task& get_task() const;
 
-    void link_bounds(abstract_lower_bound lb, abstract_upper_bound ub);
+    void link_bounds(abstract_lower_bound* lb, abstract_upper_bound* ub);
     int operator[] (int x) const;
     void change_indx(const int& indx, const int& val);
 };

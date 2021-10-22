@@ -18,8 +18,10 @@ public:
 
     void read_from_file(const file_manager& fm);
 
+    int get_dest_time(const int& indx) const;
     int get_n() const;
-    int get_cost_from(const std::vector<int> x) const;
+    int get_cost_from(const std::vector<int>& x) const;
+    int get_time_from(const std::vector<int>& x) const;
 };
 
 

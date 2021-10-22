@@ -30,6 +30,6 @@ std::vector<order_permutation> breadth_branching::branch(const order_permutation
     return ret;
 }
 
-std::vector<order_permutation> optimist_branching::branch(const order_permutation &inp) {
+std::vector<order_permutation> hybrid_branching::branch(const order_permutation &inp) {
 
 }

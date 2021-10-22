@@ -17,11 +17,8 @@ class breadth_branching : abstract_branching{
     std::vector<order_permutation> branch(const order_permutation &inp) override;
 };
 
-class optimist_branching : abstract_branching{
+class hybrid_branching : abstract_branching{
     std::vector<order_permutation> branch(const order_permutation &inp) override;
 };
 
-class realist_branching : abstract_branching{
-    std::vector<order_permutation> branch(const order_permutation &inp) override;
-};
 #endif //ITOPR_3_BRANCHING_H
