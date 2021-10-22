@@ -16,9 +16,10 @@ class order_task {
 public:
     order_task(const int& n);
 
-    void read_from_file(file_manager fm);
+    void read_from_file(const file_manager& fm);
 
-    int get_cost_from(const std::vector<int> x);
+    int get_n() const;
+    int get_cost_from(const std::vector<int> x) const;
 };
 
 

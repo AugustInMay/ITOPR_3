@@ -21,9 +21,9 @@ class file_manager {
 public:
     file_manager(const std::string& fn);
 
-    std::vector<int> get_tD();
-    std::vector<int> get_t0_i();
-    std::vector<std::vector<int>> get_t();
+    std::vector<int> get_tD() const;
+    std::vector<int> get_t0_i() const;
+    std::vector<std::vector<int>> get_t() const;
 };
 
 
