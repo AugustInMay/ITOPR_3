@@ -4,32 +4,26 @@
 
 #include "branching.h"
 
-std::vector<order_permutation> breadth_branching::branch(const order_permutation &inp) {
-    std::vector<int> gen;
+std::vector<order_permutation> breadth_branching::branch(order_permutation inp) {
     std::vector<order_permutation> ret;
     std::set<int> visited;
-    int gen_size = inp.get_gen_size();
+    int n = inp.get_task().get_n();
 
-    gen.reserve(gen_size);
-
-    for(int i=0; i<gen_size; i++){
-        gen.push_back(inp[i]);
+    for(int i=0; i<inp.get_gen_size(); i++){
         visited.emplace(inp[i]);
     }
 
-    const order_task& task(inp.get_task());
-
-    for(int i=0; i<task.get_n(); i++){
+    for(int i=0; i<n; i++){
         if(visited.find(i) == visited.end()){
-            gen.push_back(i);
-            ret.emplace_back(task, gen);
-            gen.pop_back();
+            inp.push_back(i);
+            ret.emplace_back(inp);
+            inp.pop_back();
         }
     }
 
     return ret;
 }
 
-std::vector<order_permutation> hybrid_branching::branch(const order_permutation &inp) {
+std::vector<order_permutation> hybrid_branching::branch(order_permutation inp) {
 
 }

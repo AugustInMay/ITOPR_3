@@ -10,15 +10,17 @@
 
 class abstract_branching {
 public:
-    virtual std::vector<order_permutation> branch(const order_permutation& inp) = 0;
+    virtual std::vector<order_permutation> branch(order_permutation inp) = 0;
 };
 
-class breadth_branching : abstract_branching{
-    std::vector<order_permutation> branch(const order_permutation &inp) override;
+class breadth_branching :public abstract_branching{
+public:
+    std::vector<order_permutation> branch(order_permutation inp) override;
 };
 
-class hybrid_branching : abstract_branching{
-    std::vector<order_permutation> branch(const order_permutation &inp) override;
+class hybrid_branching :public abstract_branching{
+public:
+    std::vector<order_permutation> branch(order_permutation inp) override;
 };
 
 #endif //ITOPR_3_BRANCHING_H

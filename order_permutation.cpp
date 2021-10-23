@@ -4,60 +4,107 @@
 
 #include "order_permutation.h"
 
-order_permutation::order_permutation(const order_permutation &t):task(t.task), gen(t.gen), cost(t.cost), upper_bound(t.upper_bound),
-                                                                 lower_bound(t.lower_bound) {}
+order_permutation::order_permutation(const order_permutation &t): task(t.task), gen(t.gen), weight(t.weight), time(t.time){}
 
-order_permutation::order_permutation(const order_task &t):task(t) {
+order_permutation::order_permutation(const order_task &t):task(t), weight(0), time(0) {
     gen.reserve(task.get_n());
 }
 
 order_permutation::order_permutation(const order_task &t, const std::vector<int> &g):task(t), gen(g) {
-    count_cost();
+    if(gen.empty()){
+        time = 0;
+        weight = 0;
+        return;
+    }
+
+    time += task.get_t0(gen[0]);
+
+    if(time > task.get_dest_time(gen[0])){
+        weight++;
+    }
+
+    for(int i=0; i<gen.size()-1; i++){
+        time += task.get_t(gen[i], gen[i+1]);
+
+        if(time > task.get_dest_time(gen[i+1])){
+            weight++;
+        }
+    }
 }
 
-
-void order_permutation::count_cost() {
-    cost = task.get_cost_from(this->gen);
-}
-
-int order_permutation::get_cost() const{
-    return cost;
-}
 
 int order_permutation::get_gen_size() const{
     return static_cast<int>(gen.size());
-}
-
-int order_permutation::get_lower_bound(){
-    return lower_bound->count_lb(this->gen);
-}
-
-int order_permutation::get_upper_bound() {
-    return upper_bound->count_ub(this->gen);
 }
 
 const order_task &order_permutation::get_task() const {
     return task;
 }
 
-void order_permutation::link_bounds(abstract_lower_bound* lb, abstract_upper_bound* ub) {
-    lower_bound = lb;
-    upper_bound = ub;
+int order_permutation::get_time() const {
+    return time;
+}
+
+int order_permutation::get_weight() const {
+    return weight;
 }
 
 int order_permutation::operator[](int x) const{
     return gen[x];
 }
 
-void order_permutation::change_indx(const int &indx, const int &val) {
-    if(indx >= task.get_n()){
+void order_permutation::push_back(const int &el) {
+    gen.push_back(el);
+
+    int gen_size = gen.size();
+
+    if(gen_size == 1){
+        time += task.get_t0(gen[0]);
+
+        if(time > task.get_dest_time(gen[0])){
+            weight++;
+        }
+    }
+    else{
+        time += task.get_t(gen[gen_size-2], gen[gen_size-1]);
+
+        if(time > task.get_dest_time(gen[gen_size-1])){
+            weight++;
+        }
+    }
+}
+
+void order_permutation::pop_back() {
+    int gen_size = gen.size();
+
+    if(gen_size == 0){
         return;
     }
-
-    int g_size = static_cast<int>(gen.size());
-    while (g_size-1 < indx){
-        gen.push_back(g_size);
-        g_size = static_cast<int>(gen.size());
+    else if(gen_size == 1){
+        time = 0;
+        weight = 0;
     }
-    gen[indx] = val;
+    else{
+        if(time > task.get_dest_time(gen[gen_size-1])){
+            weight--;
+        }
+        time -= task.get_t(gen[gen_size-2], gen[gen_size-1]);
+    }
+
+    gen.pop_back();
+}
+
+void order_permutation::show_permutation() {
+    for(int i=0; i<gen.size(); i++){
+        std::cout<<gen[i]+1<<" ";
+    }
+    std::cout << "-----weight: " << weight << std::endl;
+}
+
+order_permutation &order_permutation::operator=(const order_permutation &p) {
+    gen = p.gen;
+    weight = p.weight;
+    time = p.time;
+
+    return *this;
 }

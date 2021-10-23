@@ -4,51 +4,87 @@
 
 #include "bounds.h"
 
-int base_lower_bound::count_lb(std::vector<int>& gen) {
+abstract_lower_bound::abstract_lower_bound(const order_task &task):task(task) {}
+abstract_upper_bound::abstract_upper_bound(const order_task &task):task(task) {}
 
-}
+base_lower_bound::base_lower_bound(const order_task &task): abstract_lower_bound(task) {}
+base_upper_bound::base_upper_bound(const order_task &task): abstract_upper_bound(task) {}
 
-int base_upper_bound::count_ub(std::vector<int>& gen) {
-    int n = task.get_n();
-    int gen_size = gen.size();
+int base_lower_bound::count_lb(order_permutation op) {
+    int prev_weight = op.get_weight();
+    int ret = prev_weight;
 
-    if(gen_size == n){
-        return task.get_cost_from(gen);
-    }
-
-
-    int j = 0;
     std::set<int> visited;
     std::set<int> not_visited;
 
-    gen.reserve(gen_size);
-
-    for(int i=0; i<gen_size; i++){
-        visited.emplace(gen[i]);
+    for(int i=0; i<op.get_gen_size(); i++){
+        visited.emplace(op[i]);
     }
 
-    for(int i=0; i<n; i++){
+    for(int i=0; i<task.get_n(); i++){
         if(visited.find(i) == visited.end()){
             not_visited.emplace(i);
         }
     }
 
-    while(gen.size()+j != n){
-        int min_indx;
-        int min_dif = INT32_MAX;
+    for(int it : not_visited) {
+        op.push_back(it);
 
-        for(auto it = not_visited.begin(); it != not_visited.end(); ) {
-            gen.push_back(*it);
-            int cur_cost = task.get_cost_from(gen);
+        int cur_weight = op.get_weight();
+        ret += (cur_weight - prev_weight);
 
-            gen.pop_back();
-        }
+        op.pop_back();
+    }
 
-        for(auto it = not_visited.begin(); it != not_visited.end(); ) {
-            if(*it % 2 != 0)
-                it = not_visited.erase(it);
-            else
-                ++it;
+    return ret;
+}
+
+order_permutation base_upper_bound::construct_ub_gen(order_permutation op) {
+    std::set<int> visited;
+    std::set<int> not_visited;
+
+    for(int i=0; i<op.get_gen_size(); i++){
+        visited.emplace(op[i]);
+    }
+
+    for(int i=0; i<task.get_n(); i++){
+        if(visited.find(i) == visited.end()){
+            not_visited.emplace(i);
         }
     }
+
+    while(op.get_gen_size() != task.get_n()){
+        int min_indx = -1;
+        int min_dif = INT32_MAX;
+
+        for(int it : not_visited) {
+            op.push_back(it);
+            int cur_time = op.get_time();
+            int dest_time = task.get_dest_time(it);
+
+            if(cur_time <= dest_time){
+                if(dest_time - cur_time < min_dif){
+                    min_dif = dest_time - cur_time;
+                    min_indx = it;
+                }
+            }
+
+            op.pop_back();
+        }
+
+        if(min_indx == -1){
+            min_indx = *not_visited.begin();
+        }
+
+        op.push_back(min_indx);
+        auto iter = not_visited.find(min_indx);
+        not_visited.erase(iter);
+        visited.emplace(min_indx);
+    }
+
+    return op;
+}
+
+int base_upper_bound::count_ub(order_permutation op) {
+    return construct_ub_gen(op).get_weight();
 }
