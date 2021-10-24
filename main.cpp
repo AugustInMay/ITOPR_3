@@ -16,8 +16,8 @@ int main() {
     order_task task(size);
     task.read_from_file(fm);
     abstract_lower_bound* blb = new base_lower_bound(task);
-    abstract_upper_bound* bub = new base_upper_bound(task);
-    abstract_branching* branching = new breadth_branching();
+    abstract_upper_bound* bub = new ls_upper_bound(task, 10);
+    abstract_branching* branching = new hybrid_branching(blb, bub);
 
     std::vector<order_permutation> V;
     V.emplace_back(task);
@@ -34,7 +34,6 @@ int main() {
 
         std::vector<int> cache_lb;
         std::vector<int> cache_ub;
-
 //        std::cout<<"\n------------------------------------\n";
 //        std::cout<<"---FROM---"<<std::endl;
         for(auto it = V.begin(); it != V.end(); ++it){
@@ -43,7 +42,6 @@ int main() {
 
             int it_ub = bub->count_ub(*it);
             cache_ub.push_back(it_ub);
-
 //            it->show_permutation();
 //            std::cout<<"lb: "<<it_lb<<" ub: "<<it_ub<<std::endl;
         }
@@ -83,7 +81,6 @@ int main() {
         V = new_V;
         cache_lb = new_cache_lb;
         cache_ub = new_cache_ub;
-
 //        std::cout<<"---TO---"<<std::endl;
 //
 //        for(int i=0; i<V.size(); i++){
