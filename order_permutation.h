@@ -25,11 +25,12 @@ public:
     const order_task& get_task() const;
 
     int operator[] (int x) const;
+    bool operator< (const order_permutation& rhs) const;
     order_permutation& operator=(const order_permutation& p);
     void push_back(const int& el);
     void pop_back();
 
-    void show_permutation();
+    void show_permutation() const;
 };
 
 

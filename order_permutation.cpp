@@ -11,9 +11,10 @@ order_permutation::order_permutation(const order_task &t):task(t), weight(0), ti
 }
 
 order_permutation::order_permutation(const order_task &t, const std::vector<int> &g):task(t), gen(g) {
+    time = 0;
+    weight = 0;
+
     if(gen.empty()){
-        time = 0;
-        weight = 0;
         return;
     }
 
@@ -51,6 +52,10 @@ int order_permutation::get_weight() const {
 
 int order_permutation::operator[](int x) const{
     return gen[x];
+}
+
+bool order_permutation::operator<(const order_permutation &rhs) const {
+    return weight < rhs.weight;
 }
 
 void order_permutation::push_back(const int &el) {
@@ -94,11 +99,11 @@ void order_permutation::pop_back() {
     gen.pop_back();
 }
 
-void order_permutation::show_permutation() {
+void order_permutation::show_permutation() const{
     for(int i=0; i<gen.size(); i++){
         std::cout<<gen[i]+1<<" ";
     }
-    std::cout << "-----weight: " << weight << std::endl;
+    std::cout << "-----weight: " << weight << " time: "<< time <<std::endl;
 }
 
 order_permutation &order_permutation::operator=(const order_permutation &p) {
