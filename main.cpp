@@ -16,41 +16,62 @@ int main() {
     order_task task(size);
     task.read_from_file(fm);
     abstract_lower_bound* blb = new base_lower_bound(task);
-    abstract_upper_bound* bub = new ls_upper_bound(task, 10);
-    abstract_branching* branching = new hybrid_branching(blb, bub);
+    abstract_upper_bound* bub = new base_upper_bound(task);
+    abstract_branching* branching = new breadth_branching();
 
     std::vector<order_permutation> V;
     V.emplace_back(task);
 
+    std::vector<int> cache_lb;
+    std::vector<int> cache_ub;
+
+    for(auto it = V.begin(); it != V.end(); ++it){
+        int it_lb = blb->count_lb(*it);
+        cache_lb.push_back(it_lb);
+
+        int it_ub = bub->count_ub(*it);
+        cache_ub.push_back(it_ub);
+    }
+
+
     while (true){
-        std::vector<order_permutation> to_change;
+        int vertex = branching->branch(V);
 
-        for(order_permutation &el: V){
-            std::vector<order_permutation> tmp = branching->branch(el);
-            to_change.insert(to_change.end(), tmp.begin(), tmp.end());
-        }
+//        std::cout<<"!!!chose vertex: ";
+//        V[vertex].show_permutation();
 
-        V = to_change;
+        std::vector<order_permutation> vertex_neighbourhood = neighbourhood(V[vertex]);
 
-        std::vector<int> cache_lb;
-        std::vector<int> cache_ub;
-//        std::cout<<"\n------------------------------------\n";
-//        std::cout<<"---FROM---"<<std::endl;
-        for(auto it = V.begin(); it != V.end(); ++it){
+        V.erase(V.begin() + vertex);
+        cache_lb.erase(cache_lb.begin() + vertex);
+        cache_ub.erase(cache_ub.begin() + vertex);
+
+
+//        std::cout<<"!!!without it!!!"<<std::endl;
+//        for(int i=0; i<V.size(); i++){
+//            V[i].show_permutation();
+//            std::cout<<"lb: "<<cache_lb[i]<<" ub: "<<cache_ub[i]<<std::endl;
+//        }
+
+        for(auto it = vertex_neighbourhood.begin(); it != vertex_neighbourhood.end(); ++it){
+            V.emplace_back(*it);
+
             int it_lb = blb->count_lb(*it);
             cache_lb.push_back(it_lb);
 
             int it_ub = bub->count_ub(*it);
             cache_ub.push_back(it_ub);
-//            it->show_permutation();
-//            std::cout<<"lb: "<<it_lb<<" ub: "<<it_ub<<std::endl;
         }
 
-        std::vector<int> indxs;
+//        std::cout<<"!!!with its' neighbours!!!"<<std::endl;
+//        for(int i=0; i<V.size(); i++){
+//            V[i].show_permutation();
+//            std::cout<<"lb: "<<cache_lb[i]<<" ub: "<<cache_ub[i]<<std::endl;
+//        }
+
         std::set<int> discarded;
 
         for(int i=0; i<V.size(); i++){
-            indxs.push_back(i);
             int it1_lb = cache_lb[i];
 
             for(int j=0; j<V.size(); j++){
@@ -58,7 +79,6 @@ int main() {
                     int it2_ub = cache_ub[j];
 
                     if(it1_lb >= it2_ub && discarded.find(j) == discarded.end()){
-                        indxs.pop_back();
                         discarded.emplace(i);
                         break;
                     }
@@ -66,23 +86,13 @@ int main() {
             }
         }
 
-        std::vector<order_permutation> new_V;
-        std::vector<int> new_cache_lb;
-        std::vector<int> new_cache_ub;
-
-        for(int i=0; i<indxs.size(); i++){
-            int indx = indxs[i];
-
-            new_V.emplace_back(V[indx]);
-            new_cache_lb.push_back(cache_lb[indx]);
-            new_cache_ub.push_back(cache_ub[indx]);
+        for(auto it = discarded.rbegin(); it != discarded.rend(); ++it){
+            V.erase(V.begin() + *it);
+            cache_lb.erase(cache_lb.begin() + *it);
+            cache_ub.erase(cache_ub.begin() + *it);
         }
 
-        V = new_V;
-        cache_lb = new_cache_lb;
-        cache_ub = new_cache_ub;
-//        std::cout<<"---TO---"<<std::endl;
-//
+//        std::cout<<"!!!after calculation!!!"<<std::endl;
 //        for(int i=0; i<V.size(); i++){
 //            V[i].show_permutation();
 //            std::cout<<"lb: "<<cache_lb[i]<<" ub: "<<cache_ub[i]<<std::endl;

@@ -4,7 +4,38 @@
 
 #include "branching.h"
 
-std::vector<order_permutation> breadth_branching::branch(order_permutation inp) {
+int breadth_branching::branch(const std::vector<order_permutation>& inp) {
+    int indx = 0;
+    int gen_size = inp[0].get_gen_size();
+
+    for(int i=0; i<inp.size(); i++){
+        if(inp[i].get_gen_size() < gen_size){
+            indx = i;
+            gen_size = inp[i].get_gen_size();
+        }
+    }
+
+    return indx;
+}
+
+hybrid_branching::hybrid_branching(const std::vector<int>& lb, const std::vector<int>& ub): lb(lb), ub(ub) {}
+
+int hybrid_branching::branch(const std::vector<order_permutation>& inp) {
+    int indx = 0;
+    double cur_ratio = double(lb[0])/ub[0];
+
+    for(int i=0; i<inp.size(); i++){
+        double next_ratio = double(lb[i])/ub[i];
+        if(next_ratio >= cur_ratio){
+            indx = i;
+            cur_ratio = next_ratio;
+        }
+    }
+
+    return indx;
+}
+
+std::vector<order_permutation> neighbourhood(order_permutation inp){
     std::vector<order_permutation> ret;
     std::set<int> visited;
     int n = inp.get_task().get_n();
@@ -17,33 +48,6 @@ std::vector<order_permutation> breadth_branching::branch(order_permutation inp) 
         if(visited.find(i) == visited.end()){
             inp.push_back(i);
             ret.emplace_back(inp);
-            inp.pop_back();
-        }
-    }
-
-    return ret;
-}
-
-hybrid_branching::hybrid_branching(abstract_lower_bound *lb, abstract_upper_bound *ub): lb(lb), ub(ub) {}
-
-std::vector<order_permutation> hybrid_branching::branch(order_permutation inp) {
-    double cur_ratio = double(lb->count_lb(inp))/ub->count_ub(inp);
-
-    std::vector<order_permutation> ret;
-    std::set<int> visited;
-    int n = inp.get_task().get_n();
-
-    for(int i=0; i<inp.get_gen_size(); i++){
-        visited.emplace(inp[i]);
-    }
-
-    for(int i=0; i<n; i++){
-        if(visited.find(i) == visited.end()){
-            inp.push_back(i);
-            double next_ratio = double(lb->count_lb(inp))/ub->count_ub(inp);
-            if(next_ratio >= cur_ratio){
-                ret.emplace_back(inp);
-            }
             inp.pop_back();
         }
     }
