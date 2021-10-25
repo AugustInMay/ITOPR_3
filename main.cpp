@@ -98,6 +98,7 @@ int main() {
 //            std::cout<<"lb: "<<cache_lb[i]<<" ub: "<<cache_ub[i]<<std::endl;
 //        }
 
+        std::cout<<V[0].get_gen_size()<<"-"<<V.size()<<std::endl;
         if(V.size() == 1 && blb->count_lb(V[0]) == bub->count_ub(V[0])){
             if(V[0].get_gen_size() != task.get_n()){
                 V[0] = bub->construct_ub_gen(V[0]);

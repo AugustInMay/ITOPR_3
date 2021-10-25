@@ -61,15 +61,17 @@ order_permutation base_upper_bound::construct_ub_gen(order_permutation op) {
         int min_indx = -1;
         int min_dif = INT32_MAX;
 
-        for(int it : not_visited) {
-            op.push_back(it);
+        auto iter_to_rem = not_visited.begin();
+        for(auto iter = not_visited.begin(); iter != not_visited.end(); ++iter){
+            op.push_back(*iter);
             int cur_time = op.get_time();
-            int dest_time = task.get_dest_time(it);
+            int dest_time = task.get_dest_time(*iter);
 
             if(cur_time <= dest_time){
                 if(dest_time - cur_time < min_dif){
                     min_dif = dest_time - cur_time;
-                    min_indx = it;
+                    min_indx = *iter;
+                    iter_to_rem = iter;
                 }
             }
 
@@ -81,8 +83,7 @@ order_permutation base_upper_bound::construct_ub_gen(order_permutation op) {
         }
 
         op.push_back(min_indx);
-        auto iter = not_visited.find(min_indx);
-        not_visited.erase(iter);
+        not_visited.erase(iter_to_rem);
         visited.emplace(min_indx);
     }
 
