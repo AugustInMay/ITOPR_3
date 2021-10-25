@@ -33,12 +33,14 @@ int main() {
         cache_ub.push_back(it_ub);
     }
 
-
     while (true){
         int vertex = branching->branch(V);
 
-//        std::cout<<"!!!chose vertex: ";
-//        V[vertex].show_permutation();
+        std::cout<<"-------------------------------------------"<<std::endl;
+
+        std::cout<<"!!!chose vertex: ";
+        V[vertex].show_permutation();
+        std::cout<<"lb: "<<cache_lb[vertex]<<" ub: "<<cache_ub[vertex]<<std::endl;
 
         std::vector<order_permutation> vertex_neighbourhood = neighbourhood(V[vertex]);
 
@@ -47,39 +49,43 @@ int main() {
         cache_ub.erase(cache_ub.begin() + vertex);
 
 
-//        std::cout<<"!!!without it!!!"<<std::endl;
-//        for(int i=0; i<V.size(); i++){
-//            V[i].show_permutation();
-//            std::cout<<"lb: "<<cache_lb[i]<<" ub: "<<cache_ub[i]<<std::endl;
-//        }
+        std::cout<<"!!!without it!!!"<<std::endl;
+        for(int i=0; i<V.size(); i++){
+            V[i].show_permutation();
+            std::cout<<"lb: "<<cache_lb[i]<<" ub: "<<cache_ub[i]<<std::endl;
+        }
+
+        std::cout<<"!!!with its neighbours!!"<<std::endl;
 
         for(auto it = vertex_neighbourhood.begin(); it != vertex_neighbourhood.end(); ++it){
-            V.emplace_back(*it);
-
             int it_lb = blb->count_lb(*it);
             cache_lb.push_back(it_lb);
 
             int it_ub = bub->count_ub(*it);
             cache_ub.push_back(it_ub);
+
+            it->show_permutation();
+            std::cout<<"lb: "<<it_lb<<" ub: "<<it_ub<<std::endl;
         }
 
-//        std::cout<<"!!!with its' neighbours!!!"<<std::endl;
-//        for(int i=0; i<V.size(); i++){
-//            V[i].show_permutation();
-//            std::cout<<"lb: "<<cache_lb[i]<<" ub: "<<cache_ub[i]<<std::endl;
-//        }
+        V.insert(V.end(), std::make_move_iterator(vertex_neighbourhood.begin()), std::make_move_iterator(vertex_neighbourhood.end()));
 
         std::set<int> discarded;
 
         for(int i=0; i<V.size(); i++){
             int it1_lb = cache_lb[i];
 
-            for(int j=0; j<V.size(); j++){
-                if(i != j){
-                    int it2_ub = cache_ub[j];
+            for(int j=i+1; j<V.size(); j++){
+                int it2_ub = cache_ub[j];
 
-                    if(it1_lb >= it2_ub && discarded.find(j) == discarded.end()){
-                        discarded.emplace(i);
+                if(it1_lb >= it2_ub){
+                    discarded.emplace(i);
+                    break;
+                }else{
+                    int it1_ub = cache_ub[i];
+                    int it2_lb = cache_lb[j];
+                    if(it2_lb >= it1_ub){
+                        discarded.emplace(j);
                         break;
                     }
                 }
@@ -92,13 +98,12 @@ int main() {
             cache_ub.erase(cache_ub.begin() + *it);
         }
 
-//        std::cout<<"!!!after calculation!!!"<<std::endl;
-//        for(int i=0; i<V.size(); i++){
-//            V[i].show_permutation();
-//            std::cout<<"lb: "<<cache_lb[i]<<" ub: "<<cache_ub[i]<<std::endl;
-//        }
+        std::cout<<"!!!after calculation!!!"<<std::endl;
+        for(int i=0; i<V.size(); i++){
+            V[i].show_permutation();
+            std::cout<<"lb: "<<cache_lb[i]<<" ub: "<<cache_ub[i]<<std::endl;
+        }
 
-        std::cout<<V[0].get_gen_size()<<"-"<<V.size()<<std::endl;
         if(V.size() == 1 && blb->count_lb(V[0]) == bub->count_ub(V[0])){
             if(V[0].get_gen_size() != task.get_n()){
                 V[0] = bub->construct_ub_gen(V[0]);
