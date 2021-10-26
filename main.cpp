@@ -131,36 +131,30 @@ int main() {
     }
     names.emplace_back("task_2_10_n50");
 
-    table<<"Size"<<";"<<"Base solution"<<";"<<"Cost"<<";"<<"Efficiency"<<";"<<"Own solution"<<";"<<"Cost"<<";"<<"Efficiency"<<std::endl;
+    table<<"Size"<<";"<<"Configuration"<<";"<<"Own solution"<<";"<<"Cost"<<";"<<"Efficiency"<<std::endl;
 
-    for(int i=0; i<10; i++){
+    for(int i=0; i<9; i++){
         int cur_size = sizes[i];
 
         file_manager fm(names[i]);
         order_task task(cur_size);
         task.read_from_file(fm);
 
-        std::vector<int> cache_lb;
-        std::vector<int> cache_ub;
-        abstract_lower_bound* blb = new base_lower_bound(task);
-        abstract_upper_bound* bub = new base_upper_bound(task);
-        abstract_branching* branching = new breadth_branching();
+        bool do_branch_sort[2] = {false, true};
+        int ls_cap[4] = {-1, cur_size/4, cur_size/3, cur_size/2};
 
-        std::pair<order_permutation, int> solution = bb_alg(task, blb, bub, branching, cache_lb, cache_ub);
-        table<<cur_size<<";"<<solution.first.get_str_gen()<<";"<<solution.first.get_weight()<<";"<<solution.second<<";";
+        for(int do_sort=0; do_sort<2; do_sort++){
+            for(int ind_cap=0; ind_cap<4; ind_cap++){
+                std::vector<int> cache_lb;
+                std::vector<int> cache_ub;
+                abstract_lower_bound* blb = new exclusive_lower_bound(task);
+                abstract_upper_bound* bub = new ls_upper_bound(task, ls_cap[ind_cap]);
+                abstract_branching* branching = new hybrid_branching(&cache_lb, &cache_ub, do_branch_sort[do_sort]);
 
-        solution.first.show_permutation();
-
-        cache_lb.clear();
-        cache_ub.clear();
-        blb = new exclusive_lower_bound(task);
-        bub = new ls_upper_bound(task, -1);
-        branching = new hybrid_branching(&cache_lb, &cache_ub);
-
-        solution = bb_alg(task, blb, bub, branching, cache_lb, cache_ub);
-        solution.first.show_permutation();
-
-        table<<solution.first.get_str_gen()<<";"<<solution.first.get_weight()<<";"<<solution.second<<";"<<std::endl;
+                std::pair<order_permutation, int> solution = bb_alg(task, blb, bub, branching, cache_lb, cache_ub);
+                table<<cur_size<<";"<<"SORT-"+std::to_string(do_branch_sort[do_sort])+"LS_CAP"+std::to_string(ls_cap[ind_cap])<<";"<<solution.first.get_str_gen()<<";"<<solution.first.get_weight()<<";"<<solution.second<<std::endl;
+            }
+        }
     }
 
     return 0;

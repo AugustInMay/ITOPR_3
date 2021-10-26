@@ -18,17 +18,37 @@ int breadth_branching::branch(const std::vector<order_permutation>& inp) {
     return indx;
 }
 
-hybrid_branching::hybrid_branching(const std::vector<int>* lb, const std::vector<int>* ub): lb(lb), ub(ub) {}
+hybrid_branching::hybrid_branching(const std::vector<int>* lb, const std::vector<int>* ub, const bool& s): lb(lb), ub(ub), sorting(s) {}
 
 int hybrid_branching::branch(const std::vector<order_permutation>& inp) {
-    int indx = 0;
-    double cur_ratio = double(lb->at(0))/ub->at(0);
+    if(inp.size() == 1){
+        return 0;
+    }
+
+    std::vector<int> indxs;
+    double cur_ratio = -1;
 
     for(int i=0; i<inp.size(); i++){
-        double next_ratio = double(lb->at(i))/ub->at(i);
-        if(next_ratio >= cur_ratio && inp[i].get_gen_size() != inp[i].get_task().get_n()){
-            indx = i;
-            cur_ratio = next_ratio;
+        if(inp[i].get_gen_size() != inp[i].get_task().get_n()){
+            double next_ratio = double(lb->at(i))/ub->at(i);
+            if(next_ratio > cur_ratio){
+                indxs.clear();
+                indxs.push_back(i);
+                cur_ratio = next_ratio;
+            }
+            else if(next_ratio == cur_ratio){
+                indxs.push_back(i);
+            }
+        }
+    }
+
+    int indx = indxs[0];
+
+    if(sorting){
+        for(int i=1; i<indxs.size(); i++){
+            if(inp[indxs[i]].get_gen_size()>inp[indx].get_gen_size()){
+                indx = i;
+            }
         }
     }
 
