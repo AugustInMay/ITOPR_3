@@ -7,6 +7,7 @@
 
 #include "order_task.h"
 #include <iostream>
+#include <set>
 
 class order_permutation {
     const order_task& task;
@@ -19,10 +20,13 @@ public:
     order_permutation(const order_task& t);
     order_permutation(const order_task& t, const std::vector<int>& g);
 
+    std::set<int> get_not_visited();
+
     int get_time() const;
     int get_weight() const;
     int get_gen_size() const;
     const order_task& get_task() const;
+    std::string get_str_gen();
 
     int operator[] (int x) const;
     bool operator< (const order_permutation& rhs) const;

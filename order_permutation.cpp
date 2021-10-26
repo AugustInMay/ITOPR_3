@@ -113,3 +113,30 @@ order_permutation &order_permutation::operator=(const order_permutation &p) {
 
     return *this;
 }
+
+std::set<int> order_permutation::get_not_visited() {
+    std::set<int> visited;
+    std::set<int> not_visited;
+
+    for(int i=0; i<get_gen_size(); i++){
+        visited.emplace(gen[i]);
+    }
+
+    for(int i=0; i<task.get_n(); i++){
+        if(visited.find(i) == visited.end()){
+            not_visited.emplace(i);
+        }
+    }
+
+    return not_visited;
+}
+
+std::string order_permutation::get_str_gen() {
+    std::string tmp ="";
+    for(int i=0; i<gen.size(); i++){
+        tmp += std::to_string(gen[i]+1);
+        tmp += " ";
+    }
+
+    return tmp;
+}

@@ -12,23 +12,14 @@ base_upper_bound::base_upper_bound(const order_task &task): abstract_upper_bound
 ls_upper_bound::ls_upper_bound(const order_task &task, const int& p): abstract_upper_bound(task) {
     par = p;
 }
+exclusive_lower_bound::exclusive_lower_bound(const order_task &task): abstract_lower_bound(task) {}
+
 
 int base_lower_bound::count_lb(order_permutation op) {
     int prev_weight = op.get_weight();
     int ret = prev_weight;
 
-    std::set<int> visited;
-    std::set<int> not_visited;
-
-    for(int i=0; i<op.get_gen_size(); i++){
-        visited.emplace(op[i]);
-    }
-
-    for(int i=0; i<task.get_n(); i++){
-        if(visited.find(i) == visited.end()){
-            not_visited.emplace(i);
-        }
-    }
+    std::set<int> not_visited = op.get_not_visited();
 
     for(int it : not_visited) {
         op.push_back(it);
@@ -42,10 +33,70 @@ int base_lower_bound::count_lb(order_permutation op) {
     return ret;
 }
 
+int exclusive_lower_bound::count_lb(order_permutation op) {
+    int prev_weight = op.get_weight();
+    int ret = prev_weight;
+
+    std::set<int> not_visited = op.get_not_visited();
+    std::vector<int> to_check;
+
+    for(int it : not_visited) {
+        op.push_back(it);
+
+        int cur_weight = op.get_weight();
+        if(cur_weight - prev_weight == 0){
+            to_check.push_back(it);
+        }
+        else{
+            ret += 1;
+        }
+
+        op.pop_back();
+    }
+
+
+    while(!to_check.empty()){
+        for(auto it1 = to_check.begin(); it1 != to_check.end(); it1++){
+            for(auto it2 = (it1+1); it2 != to_check.end(); ++it2){
+                op.push_back(*it1);
+                op.push_back(*it2);
+
+                int cur_weight = op.get_weight();
+
+                op.pop_back();
+                op.pop_back();
+
+                if(cur_weight - prev_weight == 1){
+                    op.push_back(*it2);
+                    op.push_back(*it1);
+
+                    cur_weight = op.get_weight();
+
+                    op.pop_back();
+                    op.pop_back();
+
+                    if(cur_weight - prev_weight == 1){
+                        ret += 1;
+
+                        to_check.erase(it2);
+                        break;
+                    }
+                }
+            }
+            it1 = to_check.erase(it1);
+            if(it1 == to_check.end()){
+                break;
+            }
+        }
+    }
+
+    return ret;
+}
 
 order_permutation base_upper_bound::construct_ub_gen(order_permutation op) {
     std::set<int> visited;
     std::set<int> not_visited;
+
 
     for(int i=0; i<op.get_gen_size(); i++){
         visited.emplace(op[i]);
@@ -101,9 +152,10 @@ order_permutation ls_upper_bound::construct_ub_gen(order_permutation op) {
     std::vector<std::vector<int>> mixed;
     std::vector<order_permutation> local_field;
 
+
     int gen_size = op.get_gen_size();
     int cur_par = par;
-    if(task.get_n() - gen_size < par){
+    if(task.get_n() - gen_size < par || par == -1){
         cur_par = task.get_n() - gen_size;
     }
 

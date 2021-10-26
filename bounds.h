@@ -35,6 +35,13 @@ public:
     int count_lb(order_permutation op) override;
 };
 
+class exclusive_lower_bound:public abstract_lower_bound{
+public:
+    exclusive_lower_bound(const order_task& task);
+
+    int count_lb(order_permutation op) override;
+};
+
 class base_upper_bound:public abstract_upper_bound {
 public:
     base_upper_bound(const order_task& task);

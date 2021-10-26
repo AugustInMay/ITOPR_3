@@ -18,10 +18,10 @@ public:
 };
 
 class hybrid_branching :public abstract_branching{
-    const std::vector<int>& lb;
-    const std::vector<int>& ub;
+    const std::vector<int>* lb;
+    const std::vector<int>* ub;
 public:
-    hybrid_branching(const std::vector<int>& lb, const std::vector<int>& ub);
+    hybrid_branching(const std::vector<int>* lb, const std::vector<int>* ub);
 
     int branch(const std::vector<order_permutation>& inp) override;
 };
